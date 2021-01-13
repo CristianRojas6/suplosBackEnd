@@ -1,0 +1,164 @@
+<?php
+//Conexion con la base de datos
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$db = 'intelcost_bienes';
+
+$conn = new mysqli($host, $user, $pass, $db);
+
+//Variables de consulta de l base de datos
+
+$where = "";
+$ciudad = $_POST['ciudad'];
+$tipo = $_POST['tipo'];
+
+//funcionalidad boton
+
+if (isset($_POST['buscar'])) {
+
+  if (empty($_POST['ciudad'])) {
+
+    $where = "WHERE Ciudad LIKE '".$ciudad."%'";
+
+  }else if(empty($_POST['tipo'])){
+
+    $where = "WHERE Tipo LIKE '".$tipo."'";
+
+  } else{
+
+    $where = "WHERE Ciudad LIKE '".$ciudad."%' AND Tipo LIKE '".$tipo."'";
+
+  }
+}
+
+
+//consulta con la base de datos
+$Bienes = "SELECT * FROM bienes_generales $where";
+$filtroCiudad = "SELECT DISTINCT Ciudad FROM bienes_generales";
+$filtroTipo = "SELECT DISTINCT Tipo FROM bienes_generales";
+
+$resBienes = $conn->query($Bienes);
+$resCiudad = $conn->query($filtroCiudad);
+$resTipo = $conn->query($filtroTipo);  
+
+?>
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="css/customColors.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="css/ion.rangeSlider.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="css/ion.rangeSlider.skinFlat.css" media="screen,projection" />
+  <link type="text/css" rel="stylesheet" href="css/index.css" media="screen,projection" />
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulario</title>
+</head>
+
+<body>
+  <video src="img/video.mp4" id="vidFondo"></video>
+
+  <div class="contenedor">
+    <div class="card rowTitulo">
+      <h1>Bienes Intelcost</h1>
+    </div>
+    <div class="colFiltros">
+      <form method="POST" id="formulario">
+        <div class="filtrosContenido">
+          <div class="tituloFiltros">
+            <h5>Filtros</h5>
+          </div>
+          <div class="filtroCiudad input-field">
+            <p><label for="selectCiudad">Ciudad:</label><br></p>
+            <select name="ciudad" id="selectCiudad">
+              <option value="" selected>Elige una ciudad</option>
+              <?php
+                while ($resgistroCiudad = $resCiudad->fetch_array(MYSQLI_BOTH)) {
+                  echo '<option value="' . $resgistroCiudad['Ciudad'] . '">' . $resgistroCiudad['Ciudad'] . '</option>';
+                }
+              ?>
+            </select>
+          </div>
+          <div class="filtroTipo input-field">
+            <p><label for="selecTipo">Tipo:</label></p>
+            <br>
+            <select name="tipo" id="selectTipo">
+              <option value="" selected>Elige un tipo</option>
+              <?php
+                while ($resgistroTipo = $resTipo->fetch_array(MYSQLI_BOTH)) {
+                  echo '<option value="' . $resgistroTipo['Tipo'] . '">' . $resgistroTipo['Tipo'] . '</option>';
+                }
+              ?>
+            </select>
+          </div>
+          <div class="filtroPrecio">
+            <label for="rangoPrecio">Precio:</label>
+            <input type="text" id="rangoPrecio" name="precio" value="" />
+          </div>
+          <div class="botonField">
+            <input type="submit" class="btn white" value="Buscar" id="submitButton">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div id="tabs" style="width: 75%;">
+      <ul>
+        <li><a href="#tabs-1">Bienes disponibles</a></li>
+        <li><a href="#tabs-2">Mis bienes</a></li>
+      </ul>
+      <div id="tabs-1">
+        <div class="colContenido" id="divResultadosBusqueda">
+          <div class="tituloContenido card" style="justify-content: center;">
+            <h5>Resultados de la búsqueda:</h5>
+            <div class="divider"></div>
+            <?php
+
+            while ($resgistroBienes = $resBienes->fetch_array(MYSQLI_BOTH)) {
+              echo '<br><tr>
+                        <td>' . $resgistroBienes['Direccion'] . '</td><br>
+                        <td>' . $resgistroBienes['Ciudad'] . '</td><br>
+                        <td>' . $resgistroBienes['Telefono'] . '</td><br>
+                        <td>' . $resgistroBienes['Codigo_postal'] . '</td><br>
+                        <td>' . $resgistroBienes['Tipo'] . '</td><br>
+                        <td>' . $resgistroBienes['Precio'] . '</td><br>
+                      </tr><br>';
+            }
+
+            ?>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabs-2">
+        <div class="colContenido" id="divResultadosBusqueda">
+          <div class="tituloContenido card" style="justify-content: center;">
+            <h5>Bienes guardados:</h5>
+            <div class="divider"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script type="text/javascript" src="js/ion.rangeSlider.min.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/buscador.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $("#tabs").tabs();
+      });
+    </script>
+
+</body>
+
+</html>
